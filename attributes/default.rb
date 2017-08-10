@@ -68,6 +68,9 @@ default['mongodb3']['mongod']['config_file'] = '/etc/mongod.conf'
 # Disable Transparent Huge Pages (THP)
 default['mongodb3']['mongod']['disable-transparent-hugepages'] = false
 
+# Systemd template cookbook for mongod
+default['mongodb3']['mongod']['systemd_template_cookbook'] = 'mongodb3'
+
 # Mongos config file
 default['mongodb3']['mongos']['config_file'] = '/etc/mongos.conf'
 
