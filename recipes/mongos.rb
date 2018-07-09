@@ -59,8 +59,8 @@ end
 case node['platform']
   when 'ubuntu'
     template '/lib/systemd/system/mongos.service' do
-      cookbook node['mongodb3']['mongod']['systemd_template_cookbook']
-      source 'mongod.service.erb'
+      cookbook node['mongodb3']['mongos']['systemd_template_cookbook']
+      source 'mongos.service.erb'
       mode 0644
       only_if { node['platform_version'].to_f >= 15.04 }
     end
