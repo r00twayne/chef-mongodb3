@@ -54,37 +54,29 @@ directory File.dirname(node['mongodb3']['config']['mongos']['systemLog']['path']
   recursive true
 end
 
-# Install runit service package
-# packagecloud cookbook is not working for oracle linux.
-if node['platform'] == 'oracle'
-  # Install pygpgme package for imeyer runit yum repository
-  package 'pygpgme' do
-    ignore_failure true
-  end
-  # Install imeyer runit packagecloud yum repository
-  yum_repository 'imeyer_runit' do
-    description 'imeyer_runit'
-    baseurl 'https://packagecloud.io/imeyer/runit/el/6/$basearch'
-    gpgkey 'https://packagecloud.io/gpg.key'
-    sslcacert '/etc/pki/tls/certs/ca-bundle.crt'
-    sslverify false
-    gpgcheck false
-    action :create
-  end
-  # Set `['runit']['prefer_local_yum'] = true` to avoid install yum repository through packagecloud cookbook
-  node.set['runit']['prefer_local_yum'] = true
+
+# Create the mongod.service file
+case node['platform']
+  when 'ubuntu'
+    template '/lib/systemd/system/mongos.service' do
+      cookbook node['mongodb3']['mongod']['systemd_template_cookbook']
+      source 'mongod.service.erb'
+      mode 0644
+      only_if { node['platform_version'].to_f >= 15.04 }
+    end
 end
 
-# Install runit service package through runit::default recipe
-include_recipe 'runit::default'
-
-# Adding `mongos` service with runit
-runit_service 'mongos' do
-  retries 3
-  restart_on_update true
-  cookbook node['mongodb3']['mongos']['runit_template_cookbook']
-  options ({
-              :user => node['mongodb3']['user'],
-              :config_file => node['mongodb3']['mongos']['config_file']
-          })
+# Start the mongod service
+service 'mongos' do
+  case node['platform']
+    when 'ubuntu'
+      if node['platform_version'].to_f >= 15.04
+        provider Chef::Provider::Service::Systemd
+      elsif node['platform_version'].to_f >= 14.04
+        provider Chef::Provider::Service::Upstart
+      end
+  end
+  supports :start => true, :stop => true, :restart => true, :status => true
+  action :enable
+  subscribes :restart, "template[#{node['mongodb3']['mongos']['config_file']}]", :delayed
 end

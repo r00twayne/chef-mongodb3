@@ -4,7 +4,7 @@ maintainer_email 'sunggun.dev@gmail.com'
 license          'Apache 2.0'
 description      'Installs/Configures mongodb3'
 long_description 'Installs/Configures mongodb3'
-version          '5.3.1'
+version          '5.3.2'
 
 supports 'ubuntu', '>= 12.04'
 supports 'debian', '= 7.8'

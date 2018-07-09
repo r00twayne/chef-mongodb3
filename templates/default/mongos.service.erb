@@ -1,0 +1,29 @@
+[Unit]
+Description=High-performance, schema-free document-oriented database
+Documentation=man:mongos(1)
+Requires=encryptdisks.service disable-transparent-hugepages.service
+After=network.target encryptdisks.service disable-transparent-hugepages.service
+
+[Service]
+LimitFSIZE=infinity
+LimitCPU=infinity
+LimitAS=infinity
+LimitNOFILE=422767
+LimitNPROC=422767
+LimitRSS=infinity
+DefaultTasksMax=infinity
+Type=forking
+User=mongodb
+Group=mongodb
+RuntimeDirectory=mongod
+PIDFile=/var/run/mongod/mongod.pid
+ExecStart=/usr/bin/mongos --quiet \
+    --config /etc/mongos.conf \
+    --pidfilepath /var/run/mongod/mongos.pid \
+    --fork
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=5
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
